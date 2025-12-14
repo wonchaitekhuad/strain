@@ -213,6 +213,14 @@
                 const file = e.target.files[0];
                 if (!file) return;
 
+                // Validate file size (max 10MB)
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                if (file.size > maxSize) {
+                    self.showMessage('File too large. Maximum size is 10MB. File size: ' + 
+                                   (file.size / 1024 / 1024).toFixed(2) + 'MB', 'error');
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     try {
@@ -239,6 +247,12 @@
                 // Check if it's JSON or XML
                 if (filename.endsWith('.json')) {
                     const data = JSON.parse(content);
+                    
+                    // Validate JSON structure
+                    if (!this.validateImportData(data)) {
+                        throw new Error('Invalid file format. The file does not contain valid STRIAN project data.');
+                    }
+                    
                     xmlContent = data.data || content;
                     
                     // Restore settings if available
@@ -246,7 +260,21 @@
                         this.restoreSettings(data.settings);
                     }
                 } else {
+                    // Validate XML content
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(content, 'text/xml');
+                    const parseError = xmlDoc.querySelector('parsererror');
+                    
+                    if (parseError) {
+                        throw new Error('Invalid XML format: ' + parseError.textContent);
+                    }
+                    
                     xmlContent = content;
+                }
+
+                // Additional validation: check if xmlContent is not empty
+                if (!xmlContent || xmlContent.trim().length === 0) {
+                    throw new Error('File contains no data');
                 }
 
                 // Use the existing loadFile function if available
@@ -273,6 +301,33 @@
             } catch (error) {
                 console.error('Process import error:', error);
                 this.showMessage('Failed to process file: ' + error.message, 'error');
+            }
+        },
+
+        /**
+         * Validate imported JSON data structure
+         */
+        validateImportData: function(data) {
+            try {
+                // Check if data is an object
+                if (typeof data !== 'object' || data === null) {
+                    return false;
+                }
+                
+                // Check for required fields
+                if (!data.data || typeof data.data !== 'string') {
+                    return false;
+                }
+                
+                // Optional: Validate metadata
+                if (data.application && data.application !== 'STRIAN') {
+                    console.warn('File may not be from STRIAN application');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Validation error:', error);
+                return false;
             }
         },
 
