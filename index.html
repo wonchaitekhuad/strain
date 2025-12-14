@@ -688,6 +688,8 @@ div.sti_form > div > div.tab.active {background:navajowhite;}
         <div class="dialogDesc" style="padding-right:0.5em;">Files</div>
         <div id="form_cloud_load" class="dialogDesc tab active">Load</div>
         <div id="form_cloud_save" class="dialogDesc tab">Save</div>
+        <div id="form_cloud_export" class="dialogDesc tab">Export</div>
+        <div id="form_cloud_import" class="dialogDesc tab">Import</div>
         <div id="form_cloud_delete" class="dialogDesc tab">Delete</div>
         <div id="form_cloud_share" class="dialogDesc tab">Share</div>
         <div class="bar_qr">
@@ -765,6 +767,54 @@ div.sti_form > div > div.tab.active {background:navajowhite;}
                  <div style="line-height:1.5em; user-select:text; color:black;" id="tab_cloud_share_link"></div>
 								<button id="form_cloud_share_button" type="submit" style="text-align:center;display:inline-block;margin-top:6px;">Generate link</button>
 							</center></div>
+          </div>
+        </form>
+
+        <form class="">
+          <div id="tab_cloud_export" class="tab_content" style="padding-top: 0.4em;">
+            <div style="padding: 0.5em;">
+              <div style="margin-bottom: 0.5em; line-height: 1.5em; font-size: smaller;">
+                Export your project to local files for offline use and backup.
+              </div>
+              <center>
+                <button id="btn_export_json" type="button" style="width: 90%; margin-top: 6px; text-align: center;">
+                  Export as JSON
+                </button>
+                <button id="btn_export_xml" type="button" style="width: 90%; margin-top: 6px; text-align: center;">
+                  Export as XML
+                </button>
+                <button id="btn_export_svg" type="button" style="width: 90%; margin-top: 6px; text-align: center;">
+                  Export Diagram (SVG)
+                </button>
+                <button id="btn_export_png" type="button" style="width: 90%; margin-top: 6px; text-align: center;">
+                  Export Diagram (PNG)
+                </button>
+                <button id="btn_export_pdf" type="button" style="width: 90%; margin-top: 6px; text-align: center;">
+                  Export as PDF (Print)
+                </button>
+              </center>
+              <div style="margin-top: 0.5em; line-height: 1.3em; font-size: x-small; color: #666;">
+                Files are saved to your computer's Downloads folder.
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <form class="">
+          <div id="tab_cloud_import" class="tab_content" style="padding-top: 0.4em;">
+            <div style="padding: 0.5em;">
+              <div style="margin-bottom: 0.5em; line-height: 1.5em; font-size: smaller;">
+                Import a project from a local file (JSON or XML format).
+              </div>
+              <center>
+                <button id="btn_import_file" type="button" style="width: 90%; margin-top: 6px; text-align: center;">
+                  Import from File
+                </button>
+              </center>
+              <div style="margin-top: 0.5em; line-height: 1.3em; font-size: x-small; color: #666;">
+                Supports .json and .xml files exported from STRIAN.
+              </div>
+            </div>
           </div>
         </form>
 			</div>
@@ -1273,6 +1323,18 @@ div.sti_form > div > div.tab.active {background:navajowhite;}
   </p><h2 id="help_cloud">Files (Load and Save)</h2>
   <p>Your projects are <strong>saved on a server</strong> and cannot be stored on your local computer. When you use STRIAN for the first time, the program receives a unique User ID from the server, which acts as your dedicated folder on the server. If you run STRIAN on another device (or even on the same device with a different account or browser), another folder will be created on the server. To <strong>share files across your devices,</strong> use the same User ID from one device on all of them.</p>
   <p>Only the structure is saved; results and settings are not included in the file.</p>
+  
+  <h3>Offline Export and Import</h3>
+  <p><strong>New!</strong> You can now <strong>export your projects to local files</strong> for offline use, backup, and documentation purposes. The Export tab provides the following options:</p>
+  <ul>
+    <li><strong>Export as JSON:</strong> Saves the complete project data in JSON format, including settings and metadata. This is the recommended format for backup and data interchange.</li>
+    <li><strong>Export as XML:</strong> Saves the project structure in XML format, compatible with the server save format.</li>
+    <li><strong>Export Diagram (SVG):</strong> Exports the current structural diagram as a scalable vector graphic. Perfect for documentation and presentations.</li>
+    <li><strong>Export Diagram (PNG):</strong> Exports the diagram as a raster image with high quality (2x resolution).</li>
+    <li><strong>Export as PDF:</strong> Opens the browser's print dialog where you can save the current view as a PDF file.</li>
+  </ul>
+  <p>The <strong>Import tab</strong> allows you to load previously exported JSON or XML files back into the application. Your work is also automatically saved to browser storage every 2 minutes when changes are detected, and can be restored if you accidentally close the browser.</p>
+
 
   <h2 id="results">Results</h2>
   <p>The solver runs in your browser and doesn't rely on the
@@ -1663,6 +1725,55 @@ var svg=SVG().addTo("#sti_svg_canvas"),g_Zoom=null,g_Canvas=null,g_Mesh=null,g_m
 	</script>
   <script charset="UTF-8" src="js/solver.32.min.js" async=""></script>
   <script charset="UTF-8" src="js/sections.min.js" async=""></script>
+  <script charset="UTF-8" src="js/offline-features.js"></script>
+  <script type="text/javascript">
+  // Initialize offline features when DOM is ready
+  $(document).ready(function() {
+    // Export buttons
+    $('#btn_export_json').on('click', function(e) {
+      e.preventDefault();
+      if (window.OfflineFeatures) {
+        window.OfflineFeatures.exportAsJSON();
+      }
+    });
+    
+    $('#btn_export_xml').on('click', function(e) {
+      e.preventDefault();
+      if (window.OfflineFeatures) {
+        window.OfflineFeatures.exportAsXML();
+      }
+    });
+    
+    $('#btn_export_svg').on('click', function(e) {
+      e.preventDefault();
+      if (window.OfflineFeatures) {
+        window.OfflineFeatures.exportAsSVG();
+      }
+    });
+    
+    $('#btn_export_png').on('click', function(e) {
+      e.preventDefault();
+      if (window.OfflineFeatures) {
+        window.OfflineFeatures.exportAsPNG();
+      }
+    });
+    
+    $('#btn_export_pdf').on('click', function(e) {
+      e.preventDefault();
+      if (window.OfflineFeatures) {
+        window.OfflineFeatures.exportAsPDF();
+      }
+    });
+    
+    // Import button
+    $('#btn_import_file').on('click', function(e) {
+      e.preventDefault();
+      if (window.OfflineFeatures) {
+        window.OfflineFeatures.importFromFile();
+      }
+    });
+  });
+  </script>
 <script type="text/javascript">
 var sc_project=10230516; 
 var sc_invisible=1; 
