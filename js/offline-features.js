@@ -6,6 +6,14 @@
 (function() {
     'use strict';
 
+    // Configuration constants
+    const CONFIG = {
+        AUTO_SAVE_INTERVAL: 120000,  // 2 minutes in milliseconds
+        MAX_FILE_SIZE: 10 * 1024 * 1024,  // 10MB in bytes
+        SERVICE_WORKER_PATH: '/sw.js',
+        CACHE_PREFIX: 'strian_'
+    };
+
     // Offline Features Manager
     window.OfflineFeatures = {
         
@@ -213,10 +221,10 @@
                 const file = e.target.files[0];
                 if (!file) return;
 
-                // Validate file size (max 10MB)
-                const maxSize = 10 * 1024 * 1024; // 10MB
-                if (file.size > maxSize) {
-                    self.showMessage('File too large. Maximum size is 10MB. File size: ' + 
+                // Validate file size (max defined in CONFIG)
+                if (file.size > CONFIG.MAX_FILE_SIZE) {
+                    self.showMessage('File too large. Maximum size is ' + 
+                                   (CONFIG.MAX_FILE_SIZE / 1024 / 1024) + 'MB. File size: ' + 
                                    (file.size / 1024 / 1024).toFixed(2) + 'MB', 'error');
                     return;
                 }
@@ -427,8 +435,8 @@
                     settings: this.getCurrentSettings()
                 };
 
-                localStorage.setItem('strian_autosave', JSON.stringify(autosaveData));
-                localStorage.setItem('strian_autosave_time', Date.now().toString());
+                localStorage.setItem(CONFIG.CACHE_PREFIX + 'autosave', JSON.stringify(autosaveData));
+                localStorage.setItem(CONFIG.CACHE_PREFIX + 'autosave_time', Date.now().toString());
                 
                 console.log('Auto-saved to localStorage');
             } catch (error) {
@@ -441,7 +449,7 @@
          */
         restoreAutoSave: function() {
             try {
-                const autosaveData = localStorage.getItem('strian_autosave');
+                const autosaveData = localStorage.getItem(CONFIG.CACHE_PREFIX + 'autosave');
                 if (!autosaveData) {
                     return false;
                 }
@@ -464,7 +472,7 @@
          */
         cacheSettings: function(key, value) {
             try {
-                localStorage.setItem('strian_setting_' + key, JSON.stringify(value));
+                localStorage.setItem(CONFIG.CACHE_PREFIX + 'setting_' + key, JSON.stringify(value));
             } catch (error) {
                 console.error('Cache settings error:', error);
             }
@@ -475,7 +483,7 @@
          */
         getCachedSettings: function(key) {
             try {
-                const value = localStorage.getItem('strian_setting_' + key);
+                const value = localStorage.getItem(CONFIG.CACHE_PREFIX + 'setting_' + key);
                 return value ? JSON.parse(value) : null;
             } catch (error) {
                 console.error('Get cached settings error:', error);
@@ -496,7 +504,7 @@
 
             if ('serviceWorker' in navigator) {
                 window.strianServiceWorkerRegistered = true;
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register(CONFIG.SERVICE_WORKER_PATH)
                     .then(registration => {
                         console.log('Service Worker registered:', registration);
                         this.cacheSettings('offlineMode', true);
@@ -608,18 +616,18 @@
         }
     };
 
-    // Set up auto-save timer (every 2 minutes)
+    // Set up auto-save timer (interval defined in CONFIG)
     setInterval(function() {
         if (typeof g_Struct !== 'undefined' && g_Struct && g_Struct.bModified) {
             OfflineFeatures.autoSave();
         }
-    }, 120000);
+    }, CONFIG.AUTO_SAVE_INTERVAL);
 
     // Register service worker for offline support (only once)
     if ('serviceWorker' in navigator && !window.strianServiceWorkerRegistered) {
         window.strianServiceWorkerRegistered = true;
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/sw.js')
+            navigator.serviceWorker.register(CONFIG.SERVICE_WORKER_PATH)
                 .then(registration => {
                     console.log('Service Worker registered successfully');
                 })

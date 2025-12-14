@@ -27,14 +27,15 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Opened cache');
-        // Cache URLs as-is
-        return cache.addAll(urlsToCache.map(url => {
-          return new Request(url, { cache: 'reload' });
-        })).catch(err => {
-          console.error('Failed to cache some resources:', err);
-          // Don't fail the install if some resources fail to cache
-          return Promise.resolve();
+        // Cache URLs individually to track failures
+        const cachePromises = urlsToCache.map(url => {
+          return cache.add(new Request(url, { cache: 'reload' }))
+            .catch(err => {
+              console.error('Failed to cache resource:', url, err);
+              // Don't reject - allow partial caching
+            });
         });
+        return Promise.all(cachePromises);
       })
   );
 });
