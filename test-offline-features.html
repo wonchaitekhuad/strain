@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>STRIAN Offline Features Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #666;
+            border-bottom: 2px solid #4096ee;
+            padding-bottom: 10px;
+        }
+        button {
+            background: #4096ee;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #60abf8;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background: #e8f4f8;
+            color: #333;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 STRIAN Offline Features Test</h1>
+    
+    <div class="test-section">
+        <h2>Feature Verification</h2>
+        <div id="feature-status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>localStorage Test</h2>
+        <button onclick="testLocalStorage()">Test localStorage</button>
+        <div id="localStorage-status" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Service Worker Test</h2>
+        <button onclick="testServiceWorker()">Check Service Worker</button>
+        <div id="sw-status" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>File API Test</h2>
+        <button onclick="testFileAPI()">Test File Export</button>
+        <button onclick="testFileImport()">Test File Import</button>
+        <div id="file-status" class="status"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Canvas/SVG Test</h2>
+        <button onclick="testCanvas()">Test PNG Export</button>
+        <button onclick="testSVG()">Test SVG Export</button>
+        <div id="canvas-status" class="status"></div>
+        <svg id="test-svg" width="200" height="100" style="border: 1px solid #ccc; margin-top: 10px;">
+            <rect x="10" y="10" width="80" height="80" fill="#4096ee"/>
+            <text x="100" y="50" fill="#333">Test SVG</text>
+        </svg>
+    </div>
+
+    <script>
+        // Check features on load
+        window.addEventListener('load', function() {
+            const features = {
+                'localStorage': typeof(Storage) !== "undefined",
+                'Service Worker': 'serviceWorker' in navigator,
+                'File API': typeof File !== "undefined" && typeof FileReader !== "undefined",
+                'Canvas': typeof HTMLCanvasElement !== "undefined",
+                'Blob': typeof Blob !== "undefined",
+                'Download': document.createElement('a').download !== undefined
+            };
+
+            let html = '<ul>';
+            for (let feature in features) {
+                const status = features[feature] ? '✅' : '❌';
+                html += `<li>${status} ${feature}: ${features[feature] ? 'Supported' : 'Not supported'}</li>`;
+            }
+            html += '</ul>';
+            document.getElementById('feature-status').innerHTML = html;
+        });
+
+        function testLocalStorage() {
+            const statusDiv = document.getElementById('localStorage-status');
+            try {
+                const testData = {
+                    timestamp: new Date().toISOString(),
+                    data: 'Test data for STRIAN'
+                };
+                localStorage.setItem('strian_test', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('strian_test'));
+                
+                if (retrieved && retrieved.data === testData.data) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ localStorage working correctly! Data saved and retrieved successfully.';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '❌ localStorage data mismatch';
+                }
+                
+                localStorage.removeItem('strian_test');
+            } catch (e) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ localStorage error: ' + e.message;
+            }
+        }
+
+        function testServiceWorker() {
+            const statusDiv = document.getElementById('sw-status');
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                    if (registrations.length > 0) {
+                        statusDiv.className = 'status success';
+                        statusDiv.textContent = '✅ Service Worker registered! Count: ' + registrations.length;
+                    } else {
+                        statusDiv.className = 'status';
+                        statusDiv.textContent = 'ℹ️ No Service Worker registered yet. This is normal for the test page.';
+                    }
+                });
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ Service Worker not supported in this browser';
+            }
+        }
+
+        function testFileAPI() {
+            const statusDiv = document.getElementById('file-status');
+            try {
+                const testData = { test: 'data', timestamp: new Date().toISOString() };
+                const jsonString = JSON.stringify(testData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'strian_test.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ File export working! Check your Downloads folder for strian_test.json';
+            } catch (e) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ File export error: ' + e.message;
+            }
+        }
+
+        function testFileImport() {
+            const statusDiv = document.getElementById('file-status');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const content = event.target.result;
+                        const data = JSON.parse(content);
+                        statusDiv.className = 'status success';
+                        statusDiv.textContent = '✅ File import working! Loaded: ' + file.name;
+                    } catch (error) {
+                        statusDiv.className = 'status error';
+                        statusDiv.textContent = '❌ File import error: ' + error.message;
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function testCanvas() {
+            const statusDiv = document.getElementById('canvas-status');
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 100;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.fillStyle = '#4096ee';
+                ctx.fillRect(10, 10, 80, 80);
+                ctx.fillStyle = '#333';
+                ctx.font = '16px Arial';
+                ctx.fillText('Test PNG', 100, 50);
+                
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'strian_test.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✅ PNG export working! Check your Downloads folder for strian_test.png';
+                });
+            } catch (e) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ PNG export error: ' + e.message;
+            }
+        }
+
+        function testSVG() {
+            const statusDiv = document.getElementById('canvas-status');
+            try {
+                const svgElement = document.getElementById('test-svg');
+                const serializer = new XMLSerializer();
+                let svgString = serializer.serializeToString(svgElement);
+                svgString = '<?xml version="1.0" encoding="UTF-8"?>\n' + svgString;
+                
+                const blob = new Blob([svgString], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'strian_test.svg';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ SVG export working! Check your Downloads folder for strian_test.svg';
+            } catch (e) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '❌ SVG export error: ' + e.message;
+            }
+        }
+    </script>
+</body>
+</html>

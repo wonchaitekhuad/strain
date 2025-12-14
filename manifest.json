@@ -1,0 +1,19 @@
+{
+  "name": "STRIAN - Structural Analysis",
+  "short_name": "STRIAN",
+  "description": "Free online structural analysis calculator for beams, frames, and trusses",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4096ee",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/images/StrianIcon_Transp_48x48.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["education", "utilities"],
+  "offline_enabled": true
+}
