@@ -432,7 +432,15 @@
          * Enable offline mode with service worker
          */
         enableOfflineMode: function() {
+            // Check if service worker is already being registered
+            if (window.strianServiceWorkerRegistered) {
+                this.cacheSettings('offlineMode', true);
+                this.showMessage('Offline mode already enabled.', 'info');
+                return;
+            }
+
             if ('serviceWorker' in navigator) {
+                window.strianServiceWorkerRegistered = true;
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
                         console.log('Service Worker registered:', registration);
@@ -547,13 +555,14 @@
 
     // Set up auto-save timer (every 2 minutes)
     setInterval(function() {
-        if (typeof g_Struct !== 'undefined' && g_Struct.bModified) {
+        if (typeof g_Struct !== 'undefined' && g_Struct && g_Struct.bModified) {
             OfflineFeatures.autoSave();
         }
     }, 120000);
 
-    // Register service worker for offline support
-    if ('serviceWorker' in navigator) {
+    // Register service worker for offline support (only once)
+    if ('serviceWorker' in navigator && !window.strianServiceWorkerRegistered) {
+        window.strianServiceWorkerRegistered = true;
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {

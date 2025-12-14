@@ -27,8 +27,8 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Opened cache');
+        // Cache URLs as-is
         return cache.addAll(urlsToCache.map(url => {
-          // Handle both with and without leading slash
           return new Request(url, { cache: 'reload' });
         })).catch(err => {
           console.error('Failed to cache some resources:', err);
