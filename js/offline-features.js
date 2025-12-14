@@ -433,12 +433,20 @@
          */
         enableOfflineMode: function() {
             if ('serviceWorker' in navigator) {
-                // Service worker would be registered here
-                // For now, we'll just cache critical data
-                this.cacheSettings('offlineMode', true);
-                this.showMessage('Offline mode enabled. Your work will be auto-saved locally.', 'success');
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                        this.cacheSettings('offlineMode', true);
+                        this.showMessage('Offline mode enabled. Your work will be auto-saved locally.', 'success');
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                        this.cacheSettings('offlineMode', true);
+                        this.showMessage('Offline mode partially enabled (auto-save only).', 'info');
+                    });
             } else {
-                this.showMessage('Offline mode not supported in this browser', 'error');
+                this.cacheSettings('offlineMode', true);
+                this.showMessage('Service Worker not supported. Auto-save enabled.', 'info');
             }
         },
 
@@ -543,6 +551,19 @@
             OfflineFeatures.autoSave();
         }
     }, 120000);
+
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('Service Worker registered successfully');
+                })
+                .catch(error => {
+                    console.log('Service Worker registration failed:', error);
+                });
+        });
+    }
 
     // Check for auto-save on page load
     window.addEventListener('load', function() {
