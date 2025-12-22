@@ -1671,4 +1671,28 @@ var sc_security="582e0f37";
 
 <noscript><div class="statcounter"><a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img class="statcounter" src="https://c.statcounter.com/10230516/0/582e0f37/1/" alt="Web Analytics" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 
+<!-- Text File Handling Section -->
+<div id="textFileSection" style="position: fixed; bottom: 20px; right: 20px; background: white; border: 2px solid #ccc; border-radius: 8px; padding: 15px; max-width: 400px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000;">
+  <h3 style="margin-top: 0;">Text File Handler</h3>
+  
+  <!-- Text Input Area -->
+  <label for="textInput" style="display: block; margin-bottom: 5px; font-weight: bold;">Enter Text:</label>
+  <textarea id="textInput" rows="6" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace; resize: vertical; box-sizing: border-box;" placeholder="Type your text here..."></textarea>
+  
+  <!-- Save Button -->
+  <button id="saveTextBtn" style="margin-top: 10px; padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Save Text as File</button>
+  
+  <!-- File Upload Section -->
+  <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
+    <label for="fileInput" style="display: block; margin-bottom: 5px; font-weight: bold;">Upload Text File:</label>
+    <input type="file" id="fileInput" accept=".txt" style="margin-bottom: 10px; display: block;">
+  </div>
+  
+  <!-- Display Area for Uploaded Content -->
+  <div id="fileContentDisplay" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+    <h4 style="margin-top: 0;">File Content:</h4>
+    <pre id="fileContentPre" style="background: #f5f5f5; padding: 10px; border: 1px solid #ddd; border-radius: 4px; max-height: 200px; overflow: auto; font-size: 12px; white-space: pre-wrap; word-wrap: break-word;"></pre>
+  </div>
+</div>
+
 </body></html>
