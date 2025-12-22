@@ -1280,3 +1280,92 @@ var _statcounter = function(B) {
 	}
 }(_statcounter);
 _statcounter.record_pageview();
+
+// Text File Handling Functionality
+(function() {
+	// Function to initialize text file handling
+	function initTextFileHandling() {
+		// Get references to DOM elements
+		const textInput = document.getElementById('textInput');
+		const saveTextBtn = document.getElementById('saveTextBtn');
+		const fileInput = document.getElementById('fileInput');
+		const fileContentDisplay = document.getElementById('fileContentDisplay');
+		const fileContentPre = document.getElementById('fileContentPre');
+		
+		// Save text as file functionality
+		if (saveTextBtn) {
+			saveTextBtn.addEventListener('click', function() {
+				const text = textInput.value;
+				
+				if (!text.trim()) {
+					alert('Please enter some text before saving.');
+					return;
+				}
+				
+				// Create a Blob with the text content
+				const blob = new Blob([text], { type: 'text/plain' });
+				
+				// Create a temporary download link
+				const link = document.createElement('a');
+				link.href = URL.createObjectURL(blob);
+				link.download = 'text-file.txt';
+				
+				// Trigger download
+				document.body.appendChild(link);
+				link.click();
+				
+				// Clean up
+				document.body.removeChild(link);
+				URL.revokeObjectURL(link.href);
+				
+				console.log('Text file saved successfully');
+			});
+		}
+		
+		// Read uploaded file functionality
+		if (fileInput) {
+			fileInput.addEventListener('change', function(event) {
+				const file = event.target.files[0];
+				
+				if (!file) {
+					return;
+				}
+				
+				// Check if file is a text file
+				if (!file.name.endsWith('.txt')) {
+					alert('Please upload a .txt file');
+					fileInput.value = '';
+					return;
+				}
+				
+				// Create FileReader to read the file
+				const reader = new FileReader();
+				
+				reader.onload = function(e) {
+					const content = e.target.result;
+					
+					// Display the content in the pre element
+					fileContentPre.textContent = content;
+					fileContentDisplay.style.display = 'block';
+					
+					console.log('File content loaded successfully');
+				};
+				
+				reader.onerror = function() {
+					alert('Error reading file. Please try again.');
+					console.error('Error reading file:', reader.error);
+				};
+				
+				// Read the file as text
+				reader.readAsText(file);
+			});
+		}
+	}
+	
+	// Initialize immediately if DOM is already loaded, otherwise wait
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', initTextFileHandling);
+	} else {
+		initTextFileHandling();
+	}
+})();
