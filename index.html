@@ -1663,10 +1663,37 @@ var svg=SVG().addTo("#sti_svg_canvas"),g_Zoom=null,g_Canvas=null,g_Mesh=null,g_m
 	</script>
   <script charset="UTF-8" src="js/solver.32.min.js" async=""></script>
   <script charset="UTF-8" src="js/sections.min.js" async=""></script>
+  <!-- Offline Handler - provides graceful fallbacks for network resources -->
+  <script charset="UTF-8" src="js/offline-handler.js"></script>
 <script type="text/javascript">
-var sc_project=10230516; 
-var sc_invisible=1; 
-var sc_security="582e0f37"; 
+// StatCounter Analytics - with offline handling
+try {
+  var sc_project=10230516; 
+  var sc_invisible=1; 
+  var sc_security="582e0f37";
+  
+  // Only load counter.js if online
+  if (!window.STRIAN_OFFLINE_MODE && navigator.onLine !== false) {
+    (function() {
+      var sc = document.createElement('script');
+      sc.type = 'text/javascript';
+      sc.async = true;
+      sc.src = 'js/counter.js';
+      sc.onerror = function() {
+        console.warn('[STRIAN] Analytics unavailable - continuing in offline mode');
+        if (window.STRIAN_Offline) {
+          window.STRIAN_Offline.handleResourceError('Analytics', 'Failed to load counter.js');
+        }
+      };
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(sc, s);
+    })();
+  } else {
+    console.log('[STRIAN] Analytics disabled - offline mode');
+  }
+} catch(e) {
+  console.warn('[STRIAN] Analytics initialization failed:', e);
+}
 </script>
 
 <noscript><div class="statcounter"><a title="Web Analytics" href="https://statcounter.com/" target="_blank"><img class="statcounter" src="https://c.statcounter.com/10230516/0/582e0f37/1/" alt="Web Analytics" referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
