@@ -1302,13 +1302,17 @@ _statcounter.record_pageview();
 					return;
 				}
 				
+				// Generate filename with timestamp to avoid conflicts
+				const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+				const filename = 'text-file-' + timestamp + '.txt';
+				
 				// Create a Blob with the text content
 				const blob = new Blob([text], { type: 'text/plain' });
 				
 				// Create a temporary download link
 				const link = document.createElement('a');
 				link.href = URL.createObjectURL(blob);
-				link.download = 'text-file.txt';
+				link.download = filename;
 				
 				// Trigger download
 				document.body.appendChild(link);
@@ -1318,7 +1322,7 @@ _statcounter.record_pageview();
 				document.body.removeChild(link);
 				URL.revokeObjectURL(link.href);
 				
-				console.log('Text file saved successfully');
+				console.log('Text file saved successfully as:', filename);
 			});
 		}
 		
@@ -1331,7 +1335,14 @@ _statcounter.record_pageview();
 					return;
 				}
 				
-				// Check if file is a text file
+				// Check MIME type for security (primary check)
+				if (file.type !== 'text/plain') {
+					alert('Please upload a plain text file (.txt)');
+					fileInput.value = '';
+					return;
+				}
+				
+				// Also check file extension as an additional validation
 				if (!file.name.endsWith('.txt')) {
 					alert('Please upload a .txt file');
 					fileInput.value = '';
